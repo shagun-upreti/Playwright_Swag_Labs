@@ -72,7 +72,7 @@ test('successful checkout flow', async()=>
 
         await page.getByPlaceholder('Last Name').fill('Upreti');
 
-        await page.locator('#continue').click();
+        await page.locator('#continue').click();    
 
         const zipError = page.getByText('Error: Postal Code is required');
 
@@ -81,6 +81,14 @@ test('successful checkout flow', async()=>
         await page.getByPlaceholder('Zip/Postal Code').fill('455585');
 
         await page.locator('#continue').click();
+
+        await expect(page).toHaveURL('https://www.saucedemo.com/checkout-step-two.html');
+
+        await expect(sauceBackpack).toBeVisible();
+
+        await expect(sauceBikeLight).toBeVisible();
+
+
 
 
 
