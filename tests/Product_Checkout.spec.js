@@ -1,56 +1,64 @@
-import { test, expect } from '@playwright/test';
+import {test, expect} from '@playwright/test';
 
-import { login } from '..//Utils/functions';
+import {login} from '..//Utils/functions';
 
-import { username, password } from '..//Utils/test-data';
+import {username, password} from '..//Utils/test-data';
 
 import { inventoryUrl } from '../Utils/url';
 
-let page, context;
+let page,context; 
 
-test.describe('checkout scenarios', () => {
-    test.beforeEach(async ({ browser }) => {
+test.describe('checkout scenarios', ()=>
+{
+
+    let sauceLabsBackpack, sauceLabsBikeLight,cartButton ;
+
+    test.beforeEach(async ({browser}) =>
+    {
         context = await browser.newContext();
 
         page = await browser.newPage();
+
+        sauceLabsBackpack = page.locator('#add-to-cart-sauce-labs-backpack');
+
+        sauceLabsBikeLight = page.locator('#add-to-cart-sauce-labs-bike-light');
+
+        cartButton = page.locator("//a[@class='shopping_cart_link']");
     })
 
 
-    test('successful checkout flow', async () => {
-        await login(page, username, password);
+test('successful checkout flow', async()=>
+{
+    await login(page, username, password);
 
-        await expect(page).toHaveTitle('Swag Labs');
+    await expect(page).toHaveTitle('Swag Labs');
 
-        const sauceLabsBackpack = page.locator('#add-to-cart-sauce-labs-backpack');
+    await sauceLabsBackpack.click();
 
-        await sauceLabsBackpack.click();
+    await sauceLabsBikeLight.click();
 
-        const sauceLabsBikeLight = page.locator('#add-to-cart-sauce-labs-bike-light');
+    const cartButton = page.locator("//a[@class='shopping_cart_link']");
 
-        await sauceLabsBikeLight.click();
+    await cartButton.click();
 
-        const cartButton = page.locator("//a[@class='shopping_cart_link']");
+    const sauceBackpack =page.getByText('Sauce Labs Backpack');
 
-        await cartButton.click();
+    await expect(sauceBackpack).toBeVisible();
 
-        const sauceBackpack = page.getByText('Sauce Labs Backpack');
+    const sauceBikeLight =page.getByText('Sauce Labs Bike Light');
 
-        await expect(sauceBackpack).toBeVisible();
+    await expect(sauceBikeLight).toBeVisible();
 
-        const sauceBikeLight = page.getByText('Sauce Labs Bike Light');
+    const checkout = page.locator('#checkout');
 
-        await expect(sauceBikeLight).toBeVisible();
-
-        const checkout = page.locator('#checkout');
-
-        await checkout.click();
+    await checkout.click();
 
 
 
 
 
-        //checkout: Your Information
-
+    //checkout: Your Information
+    
         await expect(page).toHaveURL('https://www.saucedemo.com/checkout-step-one.html');
 
         await page.locator('#continue').click();
@@ -79,12 +87,14 @@ test.describe('checkout scenarios', () => {
 
         await page.locator('#continue').click();
 
+
         await expect(page).toHaveURL('https://www.saucedemo.com/checkout-step-two.html');
 
         await expect(sauceBackpack).toBeVisible();
 
         await expect(sauceBikeLight).toBeVisible();
 
+        //extract price
         const price1 = page.getByText('$29.99');
 
         const text1 = await price1.textContent();
@@ -111,14 +121,22 @@ test.describe('checkout scenarios', () => {
 
         expect(num3).toBeCloseTo(total,2);
 
-        
+        await page.locator('#finish').click();
+
+        //Thank you page
+        await expect(page).toHaveURL('https://www.saucedemo.com/checkout-complete.html');
+
+        const msg = page.getByText('Thank you for your order!');
+
+        await expect(msg).toBeVisible;
+
+        await page.locator('#back-to-products').click();
+
+        await expect(page).toHaveURL('https://www.saucedemo.com/inventory.html');
 
 
 
+})
 
-
-
-    })
-
-
+   
 })
